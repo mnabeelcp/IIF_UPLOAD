@@ -1,0 +1,91 @@
+﻿
+@using IIF_upload.Models.batchsheet;
+@using System.Collections.Generic;
+
+
+    <style>
+        .menu-label {
+            position: relative;
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #333;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .down-arrow {
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
+        }
+
+        .dropdown {
+        display: none;
+        line-height: 2;
+            /* position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: #fff;
+            border: 1px solid #ccc; */
+        }
+    </style>
+<div style="display:none" id="buttonsloaded">not loaded</div>
+<div style="display:none" id="Buttonstop">not loaded</div>
+    <div class="menu-label" id="menu-button">
+    <div onclick="displaylist()">MENU &nbsp; <span class="down-arrow">&#9660;</span></div>
+    </div>
+    <div class="dropdown" id="menu-dropdown">
+        @foreach (var item in Enum.GetValues(typeof(TTypes)))
+        {
+        <button onclick="lcomponent('@item')" class="menu-label" type="button" style="width:200px">@item</button>
+
+        <br />
+        }
+    </div>
+<div class="dtns" id=""></div>
+<div class="dtns" id="Buttons1">
+    <div class="dtns" id="Buttons">
+    </div>
+    </div>
+
+<div class="dropdown" id="Bselector" style="position:sticky;top:0">
+    
+</div>
+    <script>
+
+        function displaylist()
+        {
+        
+            if (document.getElementById('menu-dropdown').style.display == 'block') 
+            {
+                document.getElementById('menu-dropdown').style.display = 'none';
+            }
+            else 
+            {
+                document.getElementById('menu-dropdown').style.display = 'block';
+
+            }
+        }
+
+        function lcomponent(type) {
+            document.getElementById('menu-dropdown').style.display = 'none';
+            document.getElementById('Bselector').style.display = 'block';
+        $.ajax({
+            url: '/Home/VCbselector', // Replace with your controller and action method
+            data: { VCname: type }, // Provide any necessary data
+            success: function (result) {
+                // Replace the content of the target element with the view component result
+                $('#Bselector').html(result);
+            },
+            error: function (error) {
+                console.log(error);
+            }
+        });
+    
+    }
+</script>
+
+   @*  lcomponent('@item')
+@await Component.InvokeAsync("TBC") *@

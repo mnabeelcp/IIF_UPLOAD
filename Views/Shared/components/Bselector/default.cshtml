@@ -1,0 +1,214 @@
+﻿@model IIF_upload.Models.BselectorViewData;
+<script>
+    $(document).ready(function () {
+    
+    if (@(Model.Blist.Count == 0 ? "true" : "false")) {
+        alert("No batch file found for this Test");
+        window.location.href = '';
+    }
+        </script>
+
+   
+    <div class=" container-fluid text-start m-5">
+        @* <form method="get"> *@
+            <div class="container-fluid" style="height:100px">
+                <h1 class="text-center text-wrap fw-bold text-decoration-underline ">Work sheet for @ViewBag.testtype</h1>
+            </div>
+            <div class="d-grid gap-2 text">
+                <button type="button" class="btn btn-lg btn-secondary text-start" onclick="filterdisplay()">- Filter</button>
+            </div>
+            <div id="filters" style="display: none;"> 
+                <table class="table table-hover" id="filtertable">       
+                     <tr >
+                        <th>Batch Number <br/><input id="Batchfilter" class="form-control " type="text" placeholder="Batch Number" onchange="filterdata()" /></th>
+                        <th>Method <br /><input id="Methodfilter" class="form-control w-100" type="text" placeholder="Method" onchange="filterdata()" /></th>
+                        <th>SampleMatrix <br /><input id="SampleMatrixfilter" class="form-control" type="text" placeholder="SampleMatrix" onchange="filterdata()" /></th>
+                    </tr>
+
+                </table>
+            
+            </div>
+            <br />
+</div>
+
+
+
+<div id="bdropdown" class="container-fluid" style="position: sticky;left:150px;display:none  ">
+       
+         
+            
+                        <label>Batch Number=</label>
+                        @{
+                            var ids = new List<Int64>();
+                            // ids.Add("Please select the batch number");
+
+
+
+                            foreach (var item in Model.Blist)
+                            {
+
+                             if (item.Batch_Status == "InProgress")
+                                {
+                                    ids.Add(item.BatchID);
+                                }
+
+                            }
+                            ids = ids.Distinct().ToList();
+                        }
+                        @Html.DropDownList("Batch",new SelectList(ids),new { id = "loadsheet" })
+                   
+        </div> 
+
+<div class=" container-fluid  " id="ViewComponentResult" style="position: sticky;left:0px">
+</div>
+       
+            @* button type="submit" class="btn btn-primary" asp-controller="Import" asp-action="Index"hidden>open</button> *@
+        @* </form> *@
+   
+
+
+@* <div id="ViewComponentResult">
+    
+    </div> *@
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    @{
+        var distinctBatches = Model.Tbc_Header
+        .GroupBy(b => new { b.Batch, b.Testmethod, b.SampleMatrix })
+        .Select(group => group.First())
+        .ToList();
+    }
+
+        <script>
+    function filterdata() {
+        var table = document.getElementById("filtertable");
+        while (table.rows.length > 1) {
+            table.deleteRow(1);
+        }
+    @{
+        if (distinctBatches.Count>0)
+        {
+            for (int i = 0; i < distinctBatches.Count; i++)
+            {
+                                                                <text>
+                                BID='@distinctBatches[i].Batch.ToString()';
+                            MD = '@distinctBatches[i].Testmethod'
+                                                                    SM = '@distinctBatches[i].SampleMatrix'
+                                                                    BIDtemp = document.getElementById("Batchfilter").value;
+                                                                    MDtemp = document.getElementById("Methodfilter").value;
+                                                                    SMtemp = document.getElementById("SampleMatrixfilter").value;
+
+
+
+
+                                                            if ((BIDtemp !== "" || SMtemp !== "" || MDtemp !== "")) {
+                                                                if( (BID.includes(BIDtemp)) && (MD.includes(MDtemp)) && (SM.includes(SMtemp)))
+                                                                {
+
+                                                                    // window.alert(BIDtemp + MDtemp + SMtemp);
+                                                                    var newRow = table.insertRow();
+                                                                    var cell1 = newRow.insertCell(0);
+                                                                    var cell2 = newRow.insertCell(1);
+                                                                    var cell3 = newRow.insertCell(2);
+                                                                    cell1.innerHTML = '@distinctBatches[i].Batch';
+                                    cell2.innerHTML = '@distinctBatches[i].Testmethod';
+                                                                    cell3.innerHTML = '@distinctBatches[i].SampleMatrix';
+                                                                newRow.onclick = function () 
+                                                                    {
+                                                                    document.getElementById("ViewComponentResult").innerHTML='';
+                                                                      $.ajax({
+                                                                            url: '/Home/VCcall',
+                                                                        data: { batchnumber: '@distinctBatches[i].Batch' },
+                                                                            success: function (result) {
+                                                                                document.getElementById("buttonsloaded").innerHTML = 'completed';
+                                                                            
+                                                                             $('#ViewComponentResult').html(result);
+                                                                            },
+                                                                        });
+                                                                    
+                                                                    };
+                                                                }
+                                                            }
+                                                                </text>
+
+            }
+         }
+    }
+        if (table.rows.length < 2) {
+            var newRow = table.insertRow();
+            var cell1 = newRow.insertCell(0);
+            var cell2 = newRow.insertCell(1);
+            var cell3 = newRow.insertCell(2);
+            cell2.innerHTML = 'no results';
+
+        }
+        }
+
+
+    function filterdisplay() 
+        {
+        if (document.getElementById('filters').style.display == 'block') {
+            document.getElementById('filters').style.display = 'none';
+        }
+        else {
+            document.getElementById('filters').style.display = 'block';
+
+        }
+        }
+    var data = {};
+
+    // if ($('#newLoadsheet').val()) {
+    //     data.batchnumber = $('#newLoadsheet').val();
+    //     // window.alert("else working");
+
+    // } else {
+        data.batchnumber = @ids[0];
+        //window.alert("if working");
+    //}
+
+
+    // Make the AJAX request with the defined data
+    $.ajax({
+        url: '/Home/VCcall',
+        data: data,
+        success: function (result) {
+            $('#ViewComponentResult').html(result);
+        }
+    });
+    // function loadsheets() 
+    // {
+        
+    //     // window.alert($('#newLoadsheet').val());
+    //     const socket = new WebSocket('wss://your-server-address:44319/IIF_upload');
+    //     // if ($('#loadsheet')[0].selectedIndex !== 0)
+    //     // {
+    //         // var in = document.getElementById("loadsheet").selectedIndex;
+    //         // long bid = 12345678;
+    //         // window.alert("in");
+    //     // Define the data object based on the condition
+    //     var data = {};
+
+    //     // if ($('#newLoadsheet').val()) {
+    //     //     data.batchnumber = $('#newLoadsheet').val();
+    //     //     // window.alert("else working");
+            
+    //     // } else {
+    //         data1.batchnumber = $('#loadsheet').val();
+    //         window.alert("if2 working");
+    //     //}
+
+    //    // window.alert("if working");
+    //     // Make the AJAX request with the defined data
+    //     $.ajax({
+    //         url: '/Home/VCcall',
+    //         data: data1,
+    //         success: function (result) {
+    //             $('#ViewComponentResult').html(result);
+    //         }
+    //     });
+    //     //window.alert("if working2");
+        
+    //     // document.getElementById('bdropdown').style.display = 'none';
+        
+    // }
+</script>

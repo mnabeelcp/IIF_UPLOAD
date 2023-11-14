@@ -1,0 +1,567 @@
+﻿@model IIF_upload.Models.TestSheetViewData;
+
+                       
+
+<script>
+ 
+
+  
+    var selectedValue = @Model.Batchsheet[0].BatchID;
+
+    var newSelect = document.createElement("select");
+    newSelect.id = "newLoadsheet";
+
+    var existingOptions = document.getElementById("loadsheet").options;
+
+    if (existingOptions) {
+        //window.alert(existingOptions.length);
+        if (existingOptions.length === 1) {
+            // Handle the single option case
+            //window.alert("if working");
+            var option = document.createElement("option");
+            option.value = existingOptions[0].value;
+            option.text = existingOptions[0].text;
+            newSelect.appendChild(option);
+        } else {
+            //window.alert("if not working");
+            // Handle the multi-item case
+            for (var i = 0; i < existingOptions.length; i++) {
+                var option = document.createElement("option");
+                option.value = existingOptions[i].value;
+                option.text = existingOptions[i].text;
+                newSelect.appendChild(option);
+            }
+        }
+    }
+
+    // Set the selected value in the new dropdown
+    newSelect.value = selectedValue ;
+
+    // Append the new dropdown to the newDropdownContainer
+    var newDropdownContainer = document.getElementById("batchdrop");
+    newDropdownContainer.appendChild(newSelect);
+
+    newSelect.onchange = function () {
+        loadsheets();
+    };
+
+    $(document).ready(function () {
+        // Check if buttons are not loaded yet
+        // window.alert("loop");
+        if (document.getElementById("buttonsloaded").innerHTML === 'completed') {
+            // window.alert("loop okay");
+     
+            
+            
+            @if (@Model.Tbc_Header.Batch_Status == "completed") 
+                {
+                    <text>
+                      
+                document.getElementById('Buttons1').style.display = 'none';
+                         document.getElementById("completedbatchnumber").innerHTML = "    " + @Model.Tbc_Header.Batch;
+                         document.getElementById("buttonsloaded").innerHTML = "not loaded";
+                    </text>
+                }
+            else
+            {
+                <text>
+                           
+                document.getElementById('Buttons1').style.display = 'block';
+                </text>
+            }
+
+        }
+        else if (document.getElementById("buttonsloaded").innerHTML === "not loaded") {
+            
+            document.getElementById('Buttons1').style.display = 'block';
+                document.getElementById("completedbatchnumber").innerHTML = "";
+            
+            // Get source and target divs
+            if (document.getElementById("Buttonstop").innerHTML === "not loaded") {
+                var sourceDiv = $('#formbuttons');
+                var targetDiv = $('#Buttons');
+
+                // Clone the source div
+                var clonedDiv = sourceDiv.clone();
+
+                // Insert cloned div before the target div
+                clonedDiv.insertBefore(targetDiv);
+
+                // Update the loaded status
+                document.getElementById("buttonsloaded").innerHTML = "loaded";
+
+                // Alter the IDs of cloned buttons
+                clonedDiv.find('#createiif').attr('id', 'createiif1');
+                clonedDiv.find('#savesheet').attr('id', 'savesheet1');
+                clonedDiv.find('#formbuttons').attr('id', 'formbuttons1');
+                clonedDiv.on('click', '#savesheet1', function () {
+                    // Your code for the first button's click event
+                    // window.alert("it's working");
+
+                    // Trigger click event for the second cloned button
+                    $("#savesheet").click();
+                });
+                clonedDiv.on('click', '#createiif1', function () {
+                    // Your code for the first button's click event
+                    // window.alert("it's working");
+
+                    // Trigger click event for the second cloned button
+                    $("#createiif").click();
+                });
+                document.getElementById("Buttonstop").innerHTML = "loaded";
+            }
+            // $('#savesheet1').click(function () {
+            //     window.alert("it's working");
+            //     $("#savesheet").click();
+            // })
+            // Add click event listener to the second cloned button
+            // clonedDiv.on('click', '#clonedSavesheet', function () {
+            //     // Your code for the second button's click event
+            //     console.log('Second button clicked!');
+            // });
+
+        }
+        
+    });
+
+  
+  if (Model.Dsheet.Count == 0) 
+        {
+            window.alert("Data not found in the database");
+            window.location.href = 'home/index';
+        }
+
+
+
+
+    function resut(resultId, read, dia) {
+        var a = parseFloat(document.getElementById(read).value)
+        var b = parseFloat(document.getElementById(dia).value)
+        if (isNaN(b)) {
+            var product = null;
+        }
+        else {
+            var product = a * b;
+        }
+        document.getElementById(resultId).textContent = product;
+    }
+    
+    
+
+    function comment() {
+        var cmnt = document.getElementById("comment1").value;
+        for (i = 0; i < 6; i++) {
+            document.getElementById("comment" + i).value = cmnt;
+        }
+    }
+    function loadsheets() {
+
+        
+        var data = {};
+
+        data.batchnumber = $('#newLoadsheet').val();
+      // window.alert("if2 working");
+        window.alert(data);
+        $.ajax({
+            
+            url: '/Home/VCcall',
+            data: data,
+            success: function (result) {
+                $('#ViewComponentResult').html(result);
+            }
+        });
+       
+
+    }
+   
+    function dialutuonfactor(i)
+    {
+        
+        // =IF(OR((D13 = ""), (D13 = "NR")), "", POWER(10, D13))
+        if (document.getElementById("prePlating" + i).value == 0) 
+        {
+            document.getElementById("dilutionfact" + i).textContent = ""
+            document.getElementById("finalresult" + i).textContent = 0;
+            document.getElementById("dilutionfact1" + i).value = document.getElementById("dilutionfact" + i).textContent;
+
+            document.getElementById("finalresult1" + i).textContent = document.getElementById("finalresult" + i).textContent;
+        }
+        else 
+        {
+           // window.alert(i);
+            document.getElementById("dilutionfact" + i).textContent = Math.pow(10, document.getElementById("prePlating" + i).value);
+            document.getElementById("finalresult" + i).textContent = document.getElementById("dilutionfact" + i).textContent * document.getElementById("result" + i).textContent;
+           // window.alert(document.getElementById("dilutionfact1" + i).value);
+            document.getElementById("dilutionfact1" + i).value = document.getElementById("dilutionfact" + i).textContent;
+            //window.alert(document.getElementById("dilutionfact1" + i).value);
+            document.getElementById("finalresult1" + i).value = document.getElementById("finalresult" + i).textContent;
+            document.getElementById("iiffactor" + i).value = document.getElementById("dilutionfact" + i).textContent;
+            document.getElementById("iifresult" + i).value = document.getElementById("finalresult" + i).textContent;
+            
+        }
+       
+
+    }
+    function changemode() 
+    {
+        document.getElementById("mode").value = "output";
+    }
+    function finalresult(i) 
+    {
+        document.getElementById("finalresult" + i).textContent = document.getElementById("dilutionfact" + i).value * document.getElementById("result" + i).value;
+        // document.getElementById("finalresult1" + i).textContent = document.getElementById("finalresult" + i).textContent;
+    }
+</script>
+
+@* @{ if(header==null)
+    {
+        header.Add(new IIF_upload.Models.InProgress.TBC_Header
+                {
+                
+                    Batch = Model.Batchsheet[0].BatchID,
+                    SampleMatrix = "not in data table",
+                    Testmethod = Model.Batchsheet[0].Method,
+                    Dateofanalysis = DateTime.Now,
+
+                });
+    }
+} *@
+
+ <form method="post">
+
+<div style="display:none">
+    <div class="row" id="formbuttons">
+        <div class="ms-5 ps-4 col-6" style="text-align:center"></div>
+        <div class="ms-5 ps-4 col-2" style="text-align:right">
+                <button type="submit" class="btn btn-lg btn-secondary" asp-controller="export" asp-action="Savesheet" id="savesheet">Save Sheet</button>
+        </div>
+        <div class="ms-5 ps-4 col-2" style="text-align:left">
+                <button type="submit" class="btn btn-lg btn-info" asp-controller="export" asp-action="Savesheet" id="createiif" onclick="changemode()">Create IIF</button>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="ms-5 ps-4 col-5 " style="position: sticky;top:0;">
+        <table class="table table-bordered" style="text-align:left">
+            <tr class="align-content-center">
+                <th>
+                        <span class="fw-normal"> <label>Batch Number=</label></span> <span class="fw-normal" id="batchdrop"></span><span class="fw-normal" id="completedbatchnumber"></span>
+                </th>
+
+                <input type="hidden" asp-for="@Model.Tbc_Header.ID" value="@Model.Batchsheet[0].BatchID" />
+                <input type="hidden" asp-for="@Model.Tbc_Header.Batch" value="@Model.Batchsheet[0].BatchID" />
+            </tr>
+            <tr class="align-content-center">
+                <th><span class="fw-normal">Test method : </span><span id="Method">@Model.Batchsheet[0].Method</span></th>
+                <input type="hidden" asp-for="@Model.Tbc_Header.Testmethod" value="@Model.Batchsheet[0].Method" />
+            </tr>
+            <tr class="align-content-center">
+                    <th><span class="fw-normal">Sample Matrix : </span><span id="method_type">@Model.Batchsheet[0].SampleMatrix</span> </th>
+                <input type="hidden" asp-for="@Model.Tbc_Header.SampleMatrix" value="@Model.Batchsheet[0].SampleMatrix" />
+            </tr>
+            <tr class="align-content-center">
+                <th>
+                    <span class="fw-normal">Date of analysis : </span><input class="fw-bold" type="datetime-local" readonly id="currentdatetime" asp-for="@Model.Tbc_Header.Dateofanalysis" />
+                </th>
+            </tr>
+
+        </table>
+    </div>
+    <div class="ms-5 ps-4 col-5 ">
+        <table class="table table-bordered" style="text-align:left">
+            <tr class="align-content-center">
+
+                <th>
+                    <span class="fw-normal">Incubation start : </span><input type="datetime-local" asp-for="@Model.Tbc_Header.Incubationstart" value="@Model.Tbc_Header.Incubationstart.ToString("yyyy-MM-ddTHH:mm")" />
+                </th>
+
+            </tr>
+            <tr class="align-content-center">
+                <th>
+                    <span class="fw-normal">Incubation end : </span><input type="datetime-local" asp-for="@Model.Tbc_Header.Incubationend" value="@Model.Tbc_Header.Incubationend.ToString("yyyy-MM-ddTHH:mm")" />
+                </th>
+            </tr>
+            <tr class="align-content-center">
+                <th>
+                    <span class="fw-normal">Media : </span><span id="Media">
+
+                        @{
+                            var obs = new List<string>();
+                            // ids.Add("Please select the batch number");
+                            foreach (var item in Model.Dsheet)
+                            {
+                                if (item.MethodName == @Model.Batchsheet[0].Method && item.lookuptablename == "Medium")
+                                { obs.Add(item.Details); }
+                            }
+                            obs = obs.Distinct().ToList();
+                        }
+
+                        @Html.DropDownListFor(
+                        m => Model.Tbc_Header.Media,
+                        new SelectList(obs),
+                        null,
+                        new { id = "medium", onchange = "loadsheets()" } // HTML attributes
+                        )
+                    </span>
+                </th>
+            </tr>
+            <tr class="align-content-center">
+                <th>
+                        <span class="fw-normal"> Media batch Id  : </span><input class="fw-bold" asp-for="@Model.Tbc_Header.LotID" style=" border-width: 0px;" />
+                </th>
+            </tr>
+        </table>
+    </div>
+</div> 
+
+ <br /><br /><br />
+ <div class="row container-fluid" style="position: relative; width: 100%;height: auto;overflow: auto">
+     <div class="ms-0 ps-0 col-5" style="position: relative; width: 100%;height: auto;max-height:90vh">
+         <table class="table table-bordered border-2 table-hover border-black" style="text-align:left;background-color:lightgrey;width:100%;height: auto;max-height:90vh">
+
+             <tr class=" align-content-center table-bordered border-1 bg-info" style=" position: sticky;top:0px;width: auto;white-space: nowrap;z-index:3;border-width:10px">
+                 <th class="bg-info" style="width: auto;left:0px;position: sticky;white-space: nowrap;z-index:2">LOT-ID</th>
+                 <th class="bg-info" style="width: auto;left:90px;position: sticky;white-space: nowrap;z-index:2">Analyte</th>
+                 <th class="bg-info">number of replicates</th>
+                 <th class="bg-info">pre-plating dilution</th>
+                    <th class="bg-info">Total volume plated</th>
+                 <th class="bg-info">plate 1 colonies</th>
+                 <th class="bg-info">plate 2 colonies</th>
+                 <th class="bg-info">Observation</th>
+                 <th class="bg-info">Observation condition</th>
+                 <th class="bg-info">dynamic load</th>
+                 <th class="bg-info">No. confirmed for test1-Positive</th>
+                    <th class="bg-info">Average Coun</th>
+                 <th class="bg-info">Dilution Factor</th>
+                 <th class="bg-info">
+                     Final result
+                     @{
+                         String obs21 = "";
+                         // ids.Add("Please select the batch number");
+                         foreach (var item in Model.Dsheet)
+                         {
+                             if (item.MethodName == @Model.Batchsheet[0].Method && item.lookuptablename == "Unit")
+                             { obs21 = item.Details; }
+                         }
+
+                     }
+                     in &nbsp; @obs21
+
+                 </th>
+                 <th class="bg-info">upload</th>
+             </tr>
+
+             @for (var i = 0; i < Model.Batchsheet.Count; i++)
+             {
+                   <input type="hidden" asp-for="@Model.Tbc_Details[i].ID" value="@(i + 1)" />
+             <input type="hidden" asp-for="@Model.Iifout[i].BatchID" value="@Model.Batchsheet[0].BatchID" />
+             <input type="hidden" asp-for="@Model.Tbc_Details[i].Test_TBC_Header_ID" value="@Model.Batchsheet[0].BatchID" />
+             <input type="hidden" asp-for="Iifout[i].BatchPosition" value="@(i + 1)" />
+             <input type="hidden" asp-for="Iifout[i].LotID" value="@Model.Batchsheet[i].LotID" />
+             <input type="hidden" asp-for="@Model.Tbc_Details[i].LOTID" value="@Model.Batchsheet[i].LotID" />
+             <input type="hidden" asp-for="Iifout[i].SampleID" value="@Model.Batchsheet[i].LotRefNum" />
+             <input type="hidden" asp-for="Iifout[i].UniqueSampleID" value="@Model.Batchsheet[i].SampID" />
+             <input type="hidden" asp-for="Iifout[i].IdentificationType" value="2" />
+             <input type="hidden" asp-for="Iifout[i].SampleType" value="1" />
+             <input type="hidden" asp-for="Iifout[i].MethodCode" value="@Model.Batchsheet[i].Method" />
+             <input type="hidden" asp-for="Iifout[i].AnalyteCode" value="@Model.Batchsheet[i].Analyte" />
+             <input type="hidden" asp-for="@Model.Tbc_Details[i].Analyte" value="@Model.Batchsheet[i].Analyte" />
+             <input type="hidden" asp-for="Iifout[i].InstrumentCode" value="@Model.Batchsheet[i].Instrument" />
+             <input type="hidden" asp-for="Iifout[i].ResultType" value="0" />
+             <input type="hidden" asp-for="Iifout[i].AcceptFlag" value="1" />
+             <input type="hidden" asp-for="Iifout[i].InstrumentCode" value="@Model.Batchsheet[i].Instrument" />
+             <input type="hidden" asp-for="Iifout[i].AnalystID" value="from login data" />
+            
+                    
+
+                
+
+
+                    <tr class="align-content-center">
+                     <td style="width: auto;position: sticky;left:0px;white-space: nowrap;background:grey;z-index:1">@Model.Batchsheet[i].LotID-@Model.Batchsheet[i].LotRefNum</td>
+                     <td style="width: auto;position: sticky;left:90px;white-space: nowrap;background:grey;z-index:1">@Model.Batchsheet[i].Analyte</td>
+                     <td><input class="form-control w-100" type="number" style="border:0;" asp-for="@Model.Tbc_Details[i].numberofreplicates" /></td>
+                     <td>
+                         @{
+                             var obs1 = new List<SelectListItem>();
+                             for (int j = 1; j <= 9; j++)
+                             {
+                                 obs1.Add(new SelectListItem { Text = j.ToString(), Value = j.ToString() });
+                             }
+
+                             // Add "NR" to the list with a value of 0
+                             obs1.Add(new SelectListItem { Text = "NR", Value = "0" });
+                         }
+
+
+
+                         @Html.DropDownListFor(
+                     m => m.Tbc_Details[i].pre_platingdilution,
+                     new SelectList(obs1, "Value", "Text"),
+                     null,
+                     new { id = "prePlating"+i,onchange = "dialutuonfactor("+i+")" }
+
+                     )
+                     </td>
+                     <td>
+                         @{
+                             int SVP = 2;
+                             foreach (var item in Model.Dsheet)
+                             {
+                                 if (item.MethodName == @Model.Batchsheet[0].Method && item.lookuptablename == "Medium")
+                                 {
+                                     SVP = 1; //item.Details ,  sample volum plated not available in lookup table name
+                                 }
+                             }
+                             // obs = obs.Distinct().ToList();
+
+                         }
+                         <span>@SVP</span>
+
+                     </td>
+                     <td><input class="form-control w-100" type="text" asp-for="@Model.Tbc_Details[i].plate1colonies" /></td>
+                     <td><input class="form-control w-100" type="text" asp-for="@Model.Tbc_Details[i].plate2colonies" /></td>
+                     <td>
+                         @{
+                             var obs2 = new List<string>();
+                             // ids.Add("Please select the batch number");
+                             foreach (var item in Model.Dsheet)
+                             {
+                                 if (item.MethodName == @Model.Batchsheet[0].Method && item.lookuptablename == "Observation")
+                                 { obs2.Add(item.Details); }
+                             }
+                             obs2 = obs2.Distinct().ToList();
+
+                         }
+                         @Html.DropDownListFor(
+                     m => Model.Tbc_Details[i].Observation,
+                     new SelectList(obs2),
+                     null,
+                     new { id = "observation" }
+                     )
+
+                     </td>
+                     <td>
+                         @{
+                             var obs3 = new List<string>();
+                             // ids.Add("Please select the batch number");
+                             foreach (var item in Model.Dsheet)
+                             {
+                                 if (item.MethodName == @Model.Batchsheet[0].Method && item.lookuptablename == "Condition")
+                                 { obs3.Add(item.Details); }
+                             }
+                             obs3 = obs3.Distinct().ToList();
+
+                         }
+
+                         @Html.DropDownListFor(
+                     m => Model.Tbc_Details[i].Observationcondition,
+                     new SelectList(obs3),
+                     null,
+                     new { id = "observation-cndn" }
+                     )
+                     </td>
+                     <td>dynamic load</td>
+                     <td style="width: auto;white-space: nowrap;">No. confirmed for test1-Positive</td>
+                     <td id="@("result" + i)" onchange="finalresult(@i)">20</td>
+                        <td>
+
+                           <span id="@("dilutionfact" + i)">@Model.Tbc_Details[i].ResultFactor</span>
+
+                            <input type="hidden" asp-for="@Model.Tbc_Details[i].ResultFactor" value="@Model.Tbc_Details[i].ResultFactor" id="@("dilutionfact1" + i)" />
+                            <input type="hidden" asp-for="@Model.Tbc_Details[i].Finalresult" value="@Model.Tbc_Details[i].Finalresult" id="@("finalresult1" + i)" />
+                            <input type="hidden" asp-for="@Model.Iifout[i].Factor" value="@Model.Tbc_Details[i].ResultFactor" id="@("iiffactor" + i)" />
+                            <input type="hidden" asp-for="@Model.Iifout[i].Result" value="@Model.Tbc_Details[i].Finalresult" id="@("iifresult" + i)" />
+                    </td>
+                        <td><span id="@("finalresult" + i)">@Model.Tbc_Details[i].Finalresult</span></td>
+
+                        <td><input type="checkbox" asp-for="@Model.Tbc_Details[i].UploadtoLIMS" checked="@Model.Tbc_Details[i].UploadtoLIMS" /></td>
+
+
+                    </tr>
+                   
+             }
+
+         </table>
+     </div>
+ </div>
+ <br /><br /><br />
+ <div class="row text-dark text-center ">
+     <div class="col-3 opacity-100"></div>
+     <div class="col-3 border border-2 border-black " style="background-color:lightgrey">Equipment</div>
+     <div class="col-3 border border-2 border-black " style="background-color:lightgrey">Identification number</div>
+     <div class="col-3 opacity-100"></div>
+ </div>
+
+ @{
+     var eq = new List<string>();
+     // ids.Add("Please select the batch number");
+     foreach (var item in Model.Dsheet)
+     {
+         if (item.MethodName == @Model.Batchsheet[0].Method && item.lookuptablename == "Equipment")
+         { eq.Add(item.Details); }
+     }
+     eq = eq.Distinct().ToList();
+
+ }
+
+
+
+ <div class="row">
+     <div class="col-3 opacity-100"></div>
+     <div class="col-3 border fw-normal bg-light border border-2 border-black"> @Html.DropDownList("Equipment1",new SelectList(eq),new { id = "Equipment1", style="width: 100%;"})</div>
+     <input class="col-3 border border-1 text-dark border border-2 border-black" asp-for="@Model.Iifout[0].Equipment1" style=" background-color:grey" />
+     <div class="col-3 opacity-100"></div>
+ </div>
+ <div class="row">
+     <div class="col-3 opacity-100"></div>
+     <div class="col-3 border fw-normal bg-light border border-2 border-black">@Html.DropDownList("Equipment2",new SelectList(eq),new { id = "Equipment2", style="width: 100%;"})</div>
+     <input class="col-3 border border-1 text-dark border border-2 border-black" asp-for="@Model.Iifout[0].Equipment2" style=" background-color:grey" />
+     <div class="col-3 opacity-100"></div>
+ </div>
+ <div class="row">
+     <div class="col-3 opacity-100"></div>
+     <div class="col-3 border fw-normal bg-light border border-2 border-black">@Html.DropDownList("Equipment3",new SelectList(eq),new { id = "Equipment3", style="width: 100%;"})</div>
+     <input class="col-3 border border-1 text-dark border border-2 border-black" asp-for="@Model.Iifout[0].Equipment3" style=" background-color:grey" />
+     <div class="col-3 opacity-100"></div>
+ </div>
+ <div class="row">
+     <div class="col-3 opacity-100"></div>
+     <div class="col-3 border fw-normal bg-light border border-2 border-black">@Html.DropDownList("Equipment4",new SelectList(eq),new { id = "Equipment4", style="width: 100%;"})</div>
+     <input class="col-3 border border-1 text-dark border border-2 border-black" asp-for="@Model.Iifout[0].Equipment4" style=" background-color:grey" />
+     <div class="col-3 opacity-100"></div>
+ </div>
+ <div class="row">
+     <div class="col-3 opacity-100"></div>
+     <div class="col-3 border fw-normal bg-light border border-2 border-black">@Html.DropDownList("Equipment5",new SelectList(eq),new { id = "Equipment5", style="width: 100%;"})</div>
+     <input class="col-3 border border-1 text-dark border border-2 border-black" asp-for="@Model.Iifout[0].Equipment5" style=" background-color:grey" />
+     <div class="col-3 opacity-100"></div>
+ </div>
+ <div class="row">
+     <div class="col-3 opacity-100"></div>
+     <div class="col-3 border fw-normal bg-light border border-2 border-black">@Html.DropDownList("Equipment6",new SelectList(eq),new { id = "Equipment6", style="width: 100%;"})</div>
+     <input class="col-3 border border-1 text-dark border border-2 border-black" asp-for="@Model.Iifout[0].Equipment6" style=" background-color:grey" />
+     <div class="col-3 opacity-100"></div>
+ </div>
+
+
+ <br /><br /><br />
+ <div class="container-fluid text-dark text-start fw-bold fs-4 " style="background-color:lightgrey"> Comments</div>
+ <div>
+     <textarea class="container-fluid border border-1 text-dark border border-2 border-black" id="comment1" asp-for="@Model.Iifout[0].Comments" rows="6"></textarea>
+ </div>
+ 
+ <br /><br />
+ <div class="d-grid gap-2">
+     <input type="hidden" asp-for="@Model.Ttype" value="TBC" />
+        <input type="hidden" asp-for="@Model.Mode" value="save" id="mode"/>
+     @* <input type="hidden" name="headertable" value="@headertable"/> *@
+
+ </div>
+</form>
+
+   
+
+
+
